@@ -1,0 +1,78 @@
+#include "Connessione"
+
+/*
+ * TCPClient
+ * This file is part of socket
+ *
+ * Copyright (C) 2012 - Samuele Bonino			
+ *
+ * socket is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * socket is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with socket; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
+ #ifndef TCPCLIENT
+ #define TCPCLIENT
+ 
+class TCPClient
+{
+   private:
+	int conn_id;
+	int sock_id;
+	Address* addr;
+	Address* serv;
+	Connessione* conn;
+   public:
+	TCPClient(char*,char*,int,int);
+	~TCPClient();
+	bool 	send_str(char*);
+	char* 	receive_str();
+	void set_connection(Connessione*);
+	Connessione* get_connection();
+};
+
+TCPClient::TCPClient(char* _my_ip,char* _serv_ip,int _my_port,int _serv_port)
+{
+	addr = new Address(_my_ip,_my_port);
+	sock_id = socket(AF_INET,SOCK_STREAM,0);
+	conn = new Connessione(sock_id,addr);
+	serv = new Address(_serv_ip,_serv_port);
+	connect(sock_id, (struct sockaddr*) serv->get_binary(), sizeof(struct sockaddr_in));
+}
+
+TCPClient::~TCPClient()
+{
+
+}
+
+bool TCPClient::send_str(char* string)
+{
+	return conn->send_str(string);
+}
+
+char* TCPClient::receive_str()
+{
+	return conn->receive_str();
+}
+
+void TCPClient::set_connection(Connessione* _conn)
+{
+	conn = _conn;
+}
+
+Connessione* TCPClient::get_connection()
+{
+	return conn;
+}
+ #endif TCPCLIENT

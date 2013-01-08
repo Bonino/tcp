@@ -1,0 +1,88 @@
+#include "Address"
+#include "mylib.h"
+#define	MAX_MSG 4096
+/*
+ * Connessione
+ * This file is part of socket
+ *
+ * Copyright (C) 2012 - Samuele Bonino			
+ *
+ * socket is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * socket is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with socket; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+#ifndef CONNESSIONE
+#define CONNESSIONE 
+
+class Connessione
+{
+	private:
+		int 	conn_id;
+	public:
+		Connessione(int,Address*);
+		~Connessione();
+		bool 	send_str(char*);
+		char* 	receive_str();
+		void set_conn_id(int);
+		int get_conn_id();
+};
+
+Connessione::Connessione(int _conn_id,Address* addr)
+{
+	conn_id = _conn_id;
+	bind(conn_id,(struct sockaddr*)addr->get_binary(),sizeof(struct sockaddr_in));
+}
+
+Connessione::~Connessione()
+{
+	shutdown(conn_id,SHUT_RDWR);
+}
+
+bool Connessione::send_str(char* send_string)
+{
+	int str_len;
+	int ret_code;
+	str_len = lenStr(send_string);
+	ret_code = send(conn_id,send_string,(size_t)str_len,0);
+
+	if (ret_code!=str_len) return false;
+	else return true; 
+}
+
+char* Connessione::receive_str()
+{
+	char buffer[MAX_MSG];
+	int ret_code;
+	ret_code = recv(	conn_id,
+				buffer,
+				MAX_MSG,0);
+
+	if (ret_code<=0) strcpy(buffer,"");
+
+	buffer[ret_code]='\0';
+
+	return buffer;
+}
+
+void Connessione::set_conn_id(int _conn_id)
+{
+	conn_id = _conn_id;
+}
+
+int Connessione::get_conn_id()
+{
+	return conn_id;
+}
+
+#endif

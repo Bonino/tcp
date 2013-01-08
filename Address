@@ -1,0 +1,100 @@
+#ifndef ADDRESS_CLASS
+#define ADDRESS_CLASS
+
+#define IP_BASIC "0.0.0.0"
+#define	PORT_BASIC 0
+
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "mylib.h"
+
+class Address{	
+private:struct sockaddr_in* 	binary;
+	int			port;
+	char*			ip;
+	void			binary_update();
+public:	Address();
+	Address(char*,int);
+	Address(struct sockaddr_in*);
+	Address(const Address&);
+	~Address();
+
+	struct sockaddr_in*	get_binary();
+	int			get_port();
+	char*			get_ip();
+	void			set_binary(struct sockaddr_in*);
+	void			set_port(int);	
+	void			set_ip(char*);
+
+	void			show(); 
+};
+
+Address::Address(const Address& _address){
+	ip=cpyStr(_address.ip);
+	port=_address.port;
+	binary_update();
+}
+
+Address::Address() {
+	ip=IP_BASIC;
+	port=PORT_BASIC;
+	binary_update();
+}
+
+Address::Address(char* _ip,int _port) {
+	ip=cpyStr(_ip);
+	port=_port;
+	binary_update();
+}
+
+Address::Address(struct sockaddr_in* _binary) {
+	binary=(struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
+	*binary=*_binary;
+	
+	port=ntohs(binary->sin_port);
+	ip = cpyStr( inet_ntoa(binary->sin_addr));
+}
+
+Address::~Address() {}
+
+void Address::show() {	printf("%s:%d",ip,port); }
+
+struct sockaddr_in*	Address::get_binary() {
+	struct sockaddr_in* ret;
+
+	ret=(struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
+	*ret=*binary;
+	return ret;
+	}
+char*	Address::get_ip() { return cpyStr(ip); }
+int	Address::get_port() { return port; }
+
+void	Address::set_port(int _port) {
+	port=_port;
+	binary->sin_port=htons(port);	
+}
+void	Address::set_ip(char* _ip) {
+	free(ip);
+	ip=cpyStr(_ip);
+	inet_aton(ip,&(binary->sin_addr));
+}
+void	Address::set_binary(struct sockaddr_in* _binary){
+	*binary=*_binary;
+	port=ntohs(binary->sin_port);
+	ip = cpyStr( inet_ntoa(binary->sin_addr));
+}
+
+void	Address::binary_update() {
+	int i;
+	
+	binary=(struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
+	binary->sin_family=AF_INET;
+	inet_aton(ip, &(binary->sin_addr));
+	binary->sin_port=htons(port);
+	for (i=0;i<8;i++)	binary->sin_zero[i]=0;
+}
+
+#endif // ADDRESS_CLASS

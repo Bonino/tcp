@@ -1,0 +1,87 @@
+#include "Connessione"
+
+/*
+ * TCPServer
+ * This file is part of socket
+ *
+ * Copyright (C) 2012 - Samuele Bonino			
+ *
+ * socket is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * socket is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with socket; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+
+ 
+#ifndef TCPSERVER
+#define TCPSERVER
+
+ class TCPServer
+ {
+    private:
+	int conn_id;
+	int sock_id;
+	int len_binary;
+	Address* addr;
+	Connessione* conn;
+	struct sockaddr_in client_binary;
+    public:
+	TCPServer(char*, int);
+	~TCPServer();
+	void accetta();
+	bool send_str(char*);
+	char* receive_str();
+	void set_connection(Connessione*);
+	Connessione* get_connection();
+ };
+
+TCPServer::TCPServer(char* _ip, int port)
+{
+	sock_id = socket(AF_INET,SOCK_STREAM,0);
+	addr = new Address(_ip,port);
+	conn = new Connessione(sock_id,addr);
+	listen(sock_id,50);
+}
+
+TCPServer::~TCPServer()
+{
+
+}
+
+void TCPServer::accetta()
+{
+	
+	conn_id = accept(sock_id, (struct sockaddr*) &client_binary,(socklen_t*) &len_binary);
+	conn->set_conn_id(conn_id);
+}
+
+bool TCPServer::send_str(char* string)
+{
+	return conn->send_str(string);
+}
+
+char* TCPServer::receive_str()
+{
+	return conn->receive_str();
+}
+
+void TCPServer::set_connection(Connessione* _conn)
+{
+	conn = _conn;
+}
+
+Connessione* TCPServer::get_connection()
+{
+	return conn;
+}
+#endif TCPSERVER
